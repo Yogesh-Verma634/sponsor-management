@@ -4,6 +4,7 @@ from models import Sponsor, User
 from datetime import datetime
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError, DataError
 
 @app.route('/')
 @login_required
@@ -46,21 +47,23 @@ def register():
         email = request.form['email']
         password = request.form['password']
         
-        user = User.query.filter_by(username=username).first()
-        if user:
-            flash('Username already exists')
-            return redirect(url_for('register'))
-        
-        user = User.query.filter_by(email=email).first()
-        if user:
-            flash('Email already exists')
-            return redirect(url_for('register'))
-        
-        new_user = User(username=username, email=email, password_hash=generate_password_hash(password))
-        db.session.add(new_user)
-        db.session.commit()
-        flash('Registration successful. Please log in.')
-        return redirect(url_for('login'))
+        try:
+            new_user = User(username=username, email=email, password_hash=generate_password_hash(password))
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registration successful. Please log in.', 'success')
+            return redirect(url_for('login'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Username or email already exists. Please choose a different one.', 'danger')
+        except DataError:
+            db.session.rollback()
+            flash('An error occurred while processing your registration. Please try again.', 'danger')
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f'Error during registration: {str(e)}')
+            flash('An unexpected error occurred. Please try again later.', 'danger')
+    
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -75,7 +78,7 @@ def login():
             login_user(user)
             next_page = request.args.get('next')
             return redirect(next_page or url_for('index'))
-        flash('Invalid username or password')
+        flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
 @app.route('/logout')
