@@ -1,13 +1,17 @@
-from flask import render_template, request, redirect, url_for, jsonify
+from flask import render_template, request, redirect, url_for, jsonify, flash
 from app import app, db
-from models import Sponsor
+from models import Sponsor, User
 from datetime import datetime
+from flask_login import login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html')
 
 @app.route('/add_sponsor', methods=['POST'])
+@login_required
 def add_sponsor():
     name = request.form['name']
     phone = request.form['phone']
@@ -21,6 +25,7 @@ def add_sponsor():
     return redirect(url_for('index'))
 
 @app.route('/get_sponsors', methods=['GET'])
+@login_required
 def get_sponsors():
     start_date = request.args.get('start')
     end_date = request.args.get('end')
@@ -31,3 +36,54 @@ def get_sponsors():
     ).all()
 
     return jsonify([sponsor.to_dict() for sponsor in sponsors])
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        
+        user = User.query.filter_by(username=username).first()
+        if user:
+            flash('Username already exists')
+            return redirect(url_for('register'))
+        
+        user = User.query.filter_by(email=email).first()
+        if user:
+            flash('Email already exists')
+            return redirect(url_for('register'))
+        
+        new_user = User(username=username, email=email, password_hash=generate_password_hash(password))
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Registration successful. Please log in.')
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password_hash, password):
+            login_user(user)
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('index'))
+        flash('Invalid username or password')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@app.errorhandler(401)
+def unauthorized(error):
+    return jsonify({"error": "Unauthorized"}), 401
