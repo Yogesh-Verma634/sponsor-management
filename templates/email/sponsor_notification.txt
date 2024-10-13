@@ -1,0 +1,8 @@
+Upcoming Sponsor Notification
+
+Name: {{ sponsor.name }}
+Date: {{ sponsor.date }}
+Phone: {{ sponsor.phone }}
+Email: {{ sponsor.email }}
+
+Please make necessary arrangements for the upcoming sponsor visit.

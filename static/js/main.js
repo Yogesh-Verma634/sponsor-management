@@ -48,4 +48,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         calendar.render();
     }
+
+    // Add test sponsor button
+    var testSponsorBtn = document.createElement('button');
+    testSponsorBtn.textContent = 'Create Test Sponsor';
+    testSponsorBtn.className = 'btn btn-secondary mt-3';
+    testSponsorBtn.addEventListener('click', function() {
+        window.location.href = '/create_test_sponsor';
+    });
+    document.querySelector('.col-md-4').appendChild(testSponsorBtn);
 });

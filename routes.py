@@ -1,10 +1,11 @@
 from flask import render_template, request, redirect, url_for, jsonify, flash
 from app import app, db
 from models import Sponsor, User
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, DataError
+from app import check_upcoming_sponsors
 
 @app.route('/')
 @login_required
@@ -90,3 +91,21 @@ def logout():
 @app.errorhandler(401)
 def unauthorized(error):
     return jsonify({"error": "Unauthorized"}), 401
+
+@app.route('/create_test_sponsor')
+@login_required
+def create_test_sponsor():
+    test_sponsor = Sponsor(
+        name="Test Sponsor",
+        phone="1234567890",
+        email="test@example.com",
+        date=datetime.now().date() + timedelta(days=1)
+    )
+    db.session.add(test_sponsor)
+    db.session.commit()
+    
+    # Manually trigger the check_upcoming_sponsors function
+    check_upcoming_sponsors()
+    
+    flash('Test sponsor created and email notification sent.', 'success')
+    return redirect(url_for('index'))
