@@ -110,10 +110,12 @@ def create_test_sponsor():
         db.session.add(test_sponsor)
         db.session.commit()
         
+        logger.info(f"Test sponsor created: {test_sponsor.name}, ID: {test_sponsor.id}")
+        
         try:
             send_sponsor_notification(test_sponsor)
             flash('Test sponsor created and email notification sent successfully.', 'success')
-            logger.info('Test sponsor created and email notification sent successfully.')
+            logger.info('Email notification sent successfully for test sponsor.')
         except smtplib.SMTPAuthenticationError as e:
             error_msg = f'Test sponsor created, but email notification failed due to authentication error: {str(e)}'
             flash(error_msg, 'warning')
