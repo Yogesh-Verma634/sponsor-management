@@ -17,8 +17,14 @@ logger = logging.getLogger(__name__)
 def superuser_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_superuser:
-            abort(403)
+        if not current_user.is_authenticated:
+            logger.warning(f"Unauthenticated user attempted to access {f.__name__}")
+            return redirect(url_for('login', next=request.url))
+        if not current_user.is_superuser:
+            logger.warning(f"Non-superuser {current_user.username} attempted to access {f.__name__}")
+            flash('You do not have permission to access this page.', 'danger')
+            return redirect(url_for('index'))
+        logger.info(f"Superuser {current_user.username} accessed {f.__name__}")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -104,6 +110,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
+            logger.info(f"User {user.username} logged in. Superuser: {user.is_superuser}")
             next_page = request.args.get('next')
             return redirect(next_page or url_for('index'))
         flash('Invalid username or password', 'danger')
@@ -165,7 +172,6 @@ def dashboard():
     total_sponsors = Sponsor.query.count()
     upcoming_sponsors = Sponsor.query.filter(Sponsor.date >= datetime.now().date()).count()
     
-    # Sponsors by month
     sponsors_by_month = db.session.query(
         func.extract('month', Sponsor.date).label('month'),
         func.count(Sponsor.id).label('count')
@@ -176,7 +182,6 @@ def dashboard():
     for month, count in sponsors_by_month:
         sponsor_counts[int(month) - 1] = count
 
-    # Top 5 upcoming sponsors
     top_upcoming_sponsors = Sponsor.query.filter(Sponsor.date >= datetime.now().date()).order_by(Sponsor.date).limit(5).all()
 
     return render_template('dashboard.html', 
@@ -190,6 +195,7 @@ def dashboard():
 @login_required
 @superuser_required
 def admin():
+    logger.info(f"Superuser {current_user.username} accessed admin panel")
     users = User.query.all()
     return render_template('admin.html', users=users)
 
