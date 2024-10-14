@@ -84,8 +84,7 @@ def register():
         password = request.form['password']
         
         try:
-            # Check if this is the first user
-            is_first_user = User.query.count() == 0
+            is_first_user = User.is_first_user()
             new_user = User(username=username, email=email, password_hash=generate_password_hash(password), is_superuser=is_first_user)
             db.session.add(new_user)
             db.session.commit()
@@ -120,7 +119,6 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
             if user.is_superuser and not user.is_verified:
-                # Generate and send OTP
                 otp = secrets.randbelow(1000000)
                 user.otp = f"{otp:06d}"
                 db.session.commit()
@@ -269,7 +267,6 @@ def invite_superuser():
 
 @app.route('/register_superuser/<token>', methods=['GET', 'POST'])
 def register_superuser(token):
-    # In a real application, you would validate the token here
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']

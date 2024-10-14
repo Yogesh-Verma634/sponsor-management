@@ -1,6 +1,7 @@
 from app import db
 from datetime import datetime
 from flask_login import UserMixin
+from sqlalchemy import func
 
 class Sponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,3 +49,7 @@ class User(UserMixin, db.Model):
 
     def is_admin(self):
         return self.is_superuser and self.is_verified
+
+    @classmethod
+    def is_first_user(cls):
+        return cls.query.count() == 0
