@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, jsonify, flash
+from flask import render_template, request, redirect, url_for, jsonify, flash, abort
 from app import app, db
 from models import Sponsor, User
 from datetime import datetime, timedelta
@@ -10,8 +10,17 @@ from email_utils import send_sponsor_notification
 import smtplib
 import logging
 from sqlalchemy import func
+from functools import wraps
 
 logger = logging.getLogger(__name__)
+
+def superuser_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_superuser:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/')
 @login_required
@@ -64,9 +73,10 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        is_superuser = 'is_superuser' in request.form
         
         try:
-            new_user = User(username=username, email=email, password_hash=generate_password_hash(password))
+            new_user = User(username=username, email=email, password_hash=generate_password_hash(password), is_superuser=is_superuser)
             db.session.add(new_user)
             db.session.commit()
             flash('Registration successful. Please log in.', 'success')
@@ -108,6 +118,10 @@ def logout():
 @app.errorhandler(401)
 def unauthorized(error):
     return jsonify({"error": "Unauthorized"}), 401
+
+@app.errorhandler(403)
+def forbidden(error):
+    return jsonify({"error": "Forbidden"}), 403
 
 @app.route('/create_test_sponsor')
 @login_required
@@ -171,3 +185,23 @@ def dashboard():
                            months=months,
                            sponsor_counts=sponsor_counts,
                            top_upcoming_sponsors=top_upcoming_sponsors)
+
+@app.route('/admin')
+@login_required
+@superuser_required
+def admin():
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
+@app.route('/admin/toggle_superuser/<int:user_id>', methods=['POST'])
+@login_required
+@superuser_required
+def toggle_superuser(user_id):
+    user = User.query.get_or_404(user_id)
+    if user == current_user:
+        flash('You cannot change your own superuser status.', 'danger')
+    else:
+        user.is_superuser = not user.is_superuser
+        db.session.commit()
+        flash(f'Superuser status for {user.username} has been updated.', 'success')
+    return redirect(url_for('admin'))
