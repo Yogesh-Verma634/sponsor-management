@@ -57,7 +57,7 @@ body {
 }
 
 .fc-col-header-cell-cushion {
-  color: #ffffff;
+  color: #333333; /* Changed to a darker color for better visibility */
   font-weight: bold;
 }
 
@@ -107,5 +107,5 @@ body {
 
 /* Hide search section for non-superusers */
 body:not([data-superuser="true"]) #searchSection {
-  display: none;
+  display: none !important;
 }
