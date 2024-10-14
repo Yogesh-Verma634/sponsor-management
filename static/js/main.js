@@ -88,51 +88,34 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Add test sponsor button only if the container exists
-        var sponsorContainer = document.querySelector('.col-md-4');
-        var addSponsorForm = document.querySelector('form[action="/add_sponsor"]');
-        if (sponsorContainer && addSponsorForm) {
-            var existingTestSponsorBtn = sponsorContainer.querySelector('.btn-secondary');
-            if (!existingTestSponsorBtn) {
-                var testSponsorBtn = document.createElement('button');
-                testSponsorBtn.textContent = 'Create Test Sponsor';
-                testSponsorBtn.className = 'btn btn-secondary mt-3';
-                testSponsorBtn.addEventListener('click', function() {
-                    window.location.href = '/create_test_sponsor';
-                });
-                sponsorContainer.appendChild(testSponsorBtn);
+        function displaySearchResults(sponsors) {
+            var searchResults = document.getElementById('searchResults');
+            if (searchResults) {
+                searchResults.innerHTML = '';
+                if (sponsors.length === 0) {
+                    searchResults.innerHTML = '<p>No sponsors found.</p>';
+                } else {
+                    var ul = document.createElement('ul');
+                    ul.className = 'list-group';
+                    sponsors.forEach(sponsor => {
+                        var li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.innerHTML = `
+                            <h5>${sponsor.name}</h5>
+                            <p>Date: ${sponsor.date}</p>
+                            <p>Phone: ${sponsor.phone}</p>
+                            <p>Email: ${sponsor.email}</p>
+                        `;
+                        ul.appendChild(li);
+                    });
+                    searchResults.appendChild(ul);
+                }
             }
         }
     } else {
-        // Remove search section for non-superusers
         var searchSection = document.getElementById('searchSection');
         if (searchSection) {
             searchSection.remove();
-        }
-    }
-
-    function displaySearchResults(sponsors) {
-        var searchResults = document.getElementById('searchResults');
-        if (searchResults) {
-            searchResults.innerHTML = '';
-            if (sponsors.length === 0) {
-                searchResults.innerHTML = '<p>No sponsors found.</p>';
-            } else {
-                var ul = document.createElement('ul');
-                ul.className = 'list-group';
-                sponsors.forEach(sponsor => {
-                    var li = document.createElement('li');
-                    li.className = 'list-group-item';
-                    li.innerHTML = `
-                        <h5>${sponsor.name}</h5>
-                        <p>Date: ${sponsor.date}</p>
-                        <p>Phone: ${sponsor.phone}</p>
-                        <p>Email: ${sponsor.email}</p>
-                    `;
-                    ul.appendChild(li);
-                });
-                searchResults.appendChild(ul);
-            }
         }
     }
 });
