@@ -51,40 +51,59 @@ document.addEventListener('DOMContentLoaded', function() {
         calendar.render();
     }
 
-    // Search functionality (only for superusers)
-    var searchForm = document.getElementById('searchForm');
-    var searchInput = document.getElementById('searchInput');
-    var searchResults = document.getElementById('searchResults');
+    function isSuperuser() {
+        return document.body.dataset.isSuperuser === 'true';
+    }
 
-    if (searchForm && searchInput && searchResults && isSuperuser()) {
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            var query = searchInput.value.trim();
-            if (query) {
-                fetch(`/search_sponsors?query=${encodeURIComponent(query)}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            if (response.status === 403) {
-                                throw new Error('Forbidden');
+    if (isSuperuser()) {
+        var searchForm = document.getElementById('searchForm');
+        var searchInput = document.getElementById('searchInput');
+        var searchResults = document.getElementById('searchResults');
+
+        if (searchForm && searchInput && searchResults) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var query = searchInput.value.trim();
+                if (query) {
+                    fetch(`/search_sponsors?query=${encodeURIComponent(query)}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                if (response.status === 403) {
+                                    throw new Error('Forbidden');
+                                }
+                                throw new Error('Network response was not ok');
                             }
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        displaySearchResults(data);
-                    })
-                    .catch(error => {
-                        console.error('Error searching sponsors:', error);
-                        if (error.message === 'Forbidden') {
-                            searchResults.innerHTML = '<p>You do not have permission to search sponsors.</p>';
-                        }
-                    });
-            }
-        });
+                            return response.json();
+                        })
+                        .then(data => {
+                            displaySearchResults(data);
+                        })
+                        .catch(error => {
+                            console.error('Error searching sponsors:', error);
+                            if (error.message === 'Forbidden') {
+                                searchResults.innerHTML = '<p>You do not have permission to search sponsors.</p>';
+                            }
+                        });
+                }
+            });
+        }
+
+        // Add test sponsor button
+        var sponsorContainer = document.querySelector('.col-md-4');
+        var addSponsorForm = document.querySelector('form[action="/add_sponsor"]');
+        if (sponsorContainer && addSponsorForm) {
+            var testSponsorBtn = document.createElement('button');
+            testSponsorBtn.textContent = 'Create Test Sponsor';
+            testSponsorBtn.className = 'btn btn-secondary mt-3';
+            testSponsorBtn.addEventListener('click', function() {
+                window.location.href = '/create_test_sponsor';
+            });
+            sponsorContainer.appendChild(testSponsorBtn);
+        }
     }
 
     function displaySearchResults(sponsors) {
+        var searchResults = document.getElementById('searchResults');
         if (searchResults) {
             searchResults.innerHTML = '';
             if (sponsors.length === 0) {
@@ -105,25 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 searchResults.appendChild(ul);
             }
-        }
-    }
-
-    function isSuperuser() {
-        return document.body.dataset.isSuperuser === 'true';
-    }
-
-    // Add test sponsor button only if the container exists and user is a superuser
-    if (isSuperuser()) {
-        var sponsorContainer = document.querySelector('.col-md-4');
-        var addSponsorForm = document.querySelector('form[action="/add_sponsor"]');
-        if (sponsorContainer && addSponsorForm) {
-            var testSponsorBtn = document.createElement('button');
-            testSponsorBtn.textContent = 'Create Test Sponsor';
-            testSponsorBtn.className = 'btn btn-secondary mt-3';
-            testSponsorBtn.addEventListener('click', function() {
-                window.location.href = '/create_test_sponsor';
-            });
-            sponsorContainer.appendChild(testSponsorBtn);
         }
     }
 });
