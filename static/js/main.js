@@ -55,66 +55,65 @@ document.addEventListener('DOMContentLoaded', function() {
         return document.body.dataset.isSuperuser === 'true';
     }
 
-    if (isSuperuser()) {
-        var searchForm = document.getElementById('searchForm');
-        var searchInput = document.getElementById('searchInput');
-        var searchResults = document.getElementById('searchResults');
-
-        if (searchForm && searchInput && searchResults) {
-            searchForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                var query = searchInput.value.trim();
-                if (query) {
-                    fetch(`/search_sponsors?query=${encodeURIComponent(query)}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                if (response.status === 403) {
-                                    throw new Error('Forbidden');
-                                }
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            displaySearchResults(data);
-                        })
-                        .catch(error => {
-                            console.error('Error searching sponsors:', error);
-                            if (error.message === 'Forbidden') {
-                                searchResults.innerHTML = '<p>You do not have permission to search sponsors.</p>';
-                            }
-                        });
-                }
-            });
-        }
-
-        function displaySearchResults(sponsors) {
+    var searchSection = document.getElementById('searchSection');
+    if (searchSection) {
+        if (isSuperuser()) {
+            var searchForm = document.getElementById('searchForm');
+            var searchInput = document.getElementById('searchInput');
             var searchResults = document.getElementById('searchResults');
-            if (searchResults) {
-                searchResults.innerHTML = '';
-                if (sponsors.length === 0) {
-                    searchResults.innerHTML = '<p>No sponsors found.</p>';
-                } else {
-                    var ul = document.createElement('ul');
-                    ul.className = 'list-group';
-                    sponsors.forEach(sponsor => {
-                        var li = document.createElement('li');
-                        li.className = 'list-group-item';
-                        li.innerHTML = `
-                            <h5>${sponsor.name}</h5>
-                            <p>Date: ${sponsor.date}</p>
-                            <p>Phone: ${sponsor.phone}</p>
-                            <p>Email: ${sponsor.email}</p>
-                        `;
-                        ul.appendChild(li);
-                    });
-                    searchResults.appendChild(ul);
+
+            if (searchForm && searchInput && searchResults) {
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var query = searchInput.value.trim();
+                    if (query) {
+                        fetch(`/search_sponsors?query=${encodeURIComponent(query)}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    if (response.status === 403) {
+                                        throw new Error('Forbidden');
+                                    }
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                displaySearchResults(data);
+                            })
+                            .catch(error => {
+                                console.error('Error searching sponsors:', error);
+                                if (error.message === 'Forbidden') {
+                                    searchResults.innerHTML = '<p>You do not have permission to search sponsors.</p>';
+                                }
+                            });
+                    }
+                });
+            }
+
+            function displaySearchResults(sponsors) {
+                if (searchResults) {
+                    searchResults.innerHTML = '';
+                    if (sponsors.length === 0) {
+                        searchResults.innerHTML = '<p>No sponsors found.</p>';
+                    } else {
+                        var ul = document.createElement('ul');
+                        ul.className = 'list-group';
+                        sponsors.forEach(sponsor => {
+                            var li = document.createElement('li');
+                            li.className = 'list-group-item';
+                            li.innerHTML = `
+                                <h5>${sponsor.name}</h5>
+                                <p>Date: ${sponsor.date}</p>
+                                <p>Phone: ${sponsor.phone}</p>
+                                <p>Email: ${sponsor.email}</p>
+                            `;
+                            ul.appendChild(li);
+                        });
+                        searchResults.appendChild(ul);
+                    }
                 }
             }
-        }
-    } else {
-        var searchSection = document.getElementById('searchSection');
-        if (searchSection) {
+        } else {
             searchSection.remove();
         }
     }
