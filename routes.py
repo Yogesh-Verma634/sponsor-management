@@ -83,6 +83,7 @@ def register():
         password = request.form['password']
         is_superuser = False
         
+        # Check if the current user is a superuser and the superuser checkbox is checked
         if current_user.is_authenticated and current_user.is_admin():
             is_superuser = 'is_superuser' in request.form
         
