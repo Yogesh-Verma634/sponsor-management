@@ -1,16 +1,15 @@
 from flask import render_template, request, redirect, url_for, jsonify, flash, abort
-from app import app, db
-from models import Sponsor, User
-from datetime import datetime, timedelta
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, DataError
-from app import check_upcoming_sponsors
+from sqlalchemy import func
+from functools import wraps
+from datetime import datetime, timedelta
+from app import app, db, check_upcoming_sponsors
+from models import Sponsor, User
 from email_utils import send_sponsor_notification, send_superuser_invitation, send_otp, send_superuser_upgrade_confirmation
 import smtplib
 import logging
-from sqlalchemy import func
-from functools import wraps
 import secrets
 
 logger = logging.getLogger(__name__)
@@ -267,6 +266,7 @@ def invite_superuser():
 
 @app.route('/register_superuser/<token>', methods=['GET', 'POST'])
 def register_superuser(token):
+    # TODO: Implement token verification logic
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
