@@ -6,11 +6,12 @@ from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, DataError
 from app import check_upcoming_sponsors
-from email_utils import send_sponsor_notification
+from email_utils import send_sponsor_notification, send_superuser_invitation, send_otp
 import smtplib
 import logging
 from sqlalchemy import func
 from functools import wraps
+import secrets
 
 logger = logging.getLogger(__name__)
 
@@ -81,17 +82,20 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        is_superuser = False
-        
-        # Check if the current user is a superuser and the superuser checkbox is checked
-        if current_user.is_authenticated and current_user.is_admin():
-            is_superuser = 'is_superuser' in request.form
         
         try:
-            new_user = User(username=username, email=email, password_hash=generate_password_hash(password), is_superuser=is_superuser)
+            # Check if this is the first user
+            is_first_user = User.query.count() == 0
+            new_user = User(username=username, email=email, password_hash=generate_password_hash(password), is_superuser=is_first_user)
             db.session.add(new_user)
             db.session.commit()
-            flash('Registration successful. Please log in.', 'success')
+            
+            if is_first_user:
+                new_user.is_verified = True
+                db.session.commit()
+                flash('You have been registered as the first superuser. Please log in.', 'success')
+            else:
+                flash('Registration successful. Please log in.', 'success')
             return redirect(url_for('login'))
         except IntegrityError:
             db.session.rollback()
@@ -115,6 +119,13 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
+            if user.is_superuser and not user.is_verified:
+                # Generate and send OTP
+                otp = secrets.randbelow(1000000)
+                user.otp = f"{otp:06d}"
+                db.session.commit()
+                send_otp(user.email, user.otp)
+                return redirect(url_for('verify_otp', user_id=user.id))
             login_user(user)
             logger.info(f"User {user.username} logged in. Superuser: {user.is_superuser}")
             if user.is_admin():
@@ -125,6 +136,22 @@ def login():
             return redirect(next_page or url_for('index'))
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
+
+@app.route('/verify_otp/<int:user_id>', methods=['GET', 'POST'])
+def verify_otp(user_id):
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        otp = request.form['otp']
+        if otp == user.otp:
+            user.is_verified = True
+            user.otp = None
+            db.session.commit()
+            login_user(user)
+            flash('OTP verified successfully. You are now logged in as a superuser.', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid OTP. Please try again.', 'danger')
+    return render_template('verify_otp.html', user_id=user_id)
 
 @app.route('/logout')
 @login_required
@@ -219,6 +246,47 @@ def toggle_superuser(user_id):
         flash('You cannot change your own superuser status.', 'danger')
     else:
         user.is_superuser = not user.is_superuser
+        if user.is_superuser:
+            user.is_verified = False
         db.session.commit()
         flash(f'Superuser status for {user.username} has been updated.', 'success')
     return redirect(url_for('admin'))
+
+@app.route('/admin/invite_superuser', methods=['GET', 'POST'])
+@login_required
+@superuser_required
+def invite_superuser():
+    if request.method == 'POST':
+        email = request.form['email']
+        if User.query.filter_by(email=email).first():
+            flash('A user with this email already exists.', 'danger')
+        else:
+            token = secrets.token_urlsafe(32)
+            send_superuser_invitation(email, token)
+            flash(f'Invitation sent to {email}', 'success')
+        return redirect(url_for('admin'))
+    return render_template('invite_superuser.html')
+
+@app.route('/register_superuser/<token>', methods=['GET', 'POST'])
+def register_superuser(token):
+    # In a real application, you would validate the token here
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        
+        try:
+            new_user = User(username=username, email=email, password_hash=generate_password_hash(password), is_superuser=True)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('You have been registered as a superuser. Please log in to verify your account.', 'success')
+            return redirect(url_for('login'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Username or email already exists. Please choose a different one.', 'danger')
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f'Error during superuser registration: {str(e)}')
+            flash('An unexpected error occurred. Please try again later.', 'danger')
+    
+    return render_template('register_superuser.html', token=token)

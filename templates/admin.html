@@ -4,12 +4,14 @@
 <div class="container mt-4">
     <h1 class="mb-4">Admin Panel</h1>
     {% if current_user.is_superuser %}
+        <a href="{{ url_for('invite_superuser') }}" class="btn btn-primary mb-3">Invite New Superuser</a>
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Superuser</th>
+                    <th>Verified</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -19,6 +21,7 @@
                     <td>{{ user.username }}</td>
                     <td>{{ user.email }}</td>
                     <td>{{ 'Yes' if user.is_superuser else 'No' }}</td>
+                    <td>{{ 'Yes' if user.is_verified else 'No' }}</td>
                     <td>
                         {% if user != current_user %}
                         <form action="{{ url_for('toggle_superuser', user_id=user.id) }}" method="POST">

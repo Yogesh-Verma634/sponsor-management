@@ -34,6 +34,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(512))
     is_superuser = db.Column(db.Boolean, default=False)
+    otp = db.Column(db.String(6))
+    is_verified = db.Column(db.Boolean, default=False)
 
     def __init__(self, username, email, password_hash, is_superuser=False):
         self.username = username
@@ -45,4 +47,4 @@ class User(UserMixin, db.Model):
         return f'<User {self.username}>'
 
     def is_admin(self):
-        return self.is_superuser
+        return self.is_superuser and self.is_verified
