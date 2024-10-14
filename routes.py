@@ -6,7 +6,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, DataError
 from app import check_upcoming_sponsors
-from email_utils import send_sponsor_notification, send_superuser_invitation, send_otp
+from email_utils import send_sponsor_notification, send_superuser_invitation, send_otp, send_superuser_upgrade_confirmation
 import smtplib
 import logging
 from sqlalchemy import func
@@ -290,3 +290,24 @@ def register_superuser(token):
             flash('An unexpected error occurred. Please try again later.', 'danger')
     
     return render_template('register_superuser.html', token=token)
+
+@app.route('/admin/upgrade_to_superuser', methods=['GET', 'POST'])
+@login_required
+@superuser_required
+def upgrade_to_superuser():
+    if request.method == 'POST':
+        email = request.form['email']
+        user = User.query.filter_by(email=email).first()
+        if user:
+            if user.is_superuser:
+                flash('This user is already a superuser.', 'info')
+            else:
+                user.is_superuser = True
+                user.is_verified = False
+                db.session.commit()
+                send_superuser_upgrade_confirmation(user.email)
+                flash(f'User {user.username} has been upgraded to superuser status. They will need to verify their account on next login.', 'success')
+        else:
+            flash('No user found with that email address.', 'danger')
+        return redirect(url_for('admin'))
+    return render_template('upgrade_to_superuser.html')

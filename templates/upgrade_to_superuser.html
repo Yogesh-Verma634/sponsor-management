@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Upgrade User to Superuser</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="email" class="form-label">User Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Upgrade to Superuser</button>
+    </form>
+</div>
+{% endblock %}

@@ -63,3 +63,18 @@ def send_otp(email, otp):
     except Exception as e:
         logger.error(f"Error sending OTP: {str(e)}")
         raise
+
+def send_superuser_upgrade_confirmation(email):
+    subject = "Superuser Status Upgrade Confirmation"
+    recipients = [email]
+    
+    msg = Message(subject=subject, recipients=recipients)
+    msg.body = "Your account has been upgraded to superuser status. Please log in to verify your account."
+    msg.html = render_template('email/superuser_upgrade_confirmation.html')
+    
+    try:
+        mail.send(msg)
+        logger.info(f"Superuser upgrade confirmation sent successfully to: {email}")
+    except Exception as e:
+        logger.error(f"Error sending superuser upgrade confirmation: {str(e)}")
+        raise
