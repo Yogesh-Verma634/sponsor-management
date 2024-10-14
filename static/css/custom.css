@@ -56,6 +56,11 @@ body {
   color: var(--text-color);
 }
 
+.fc-col-header-cell-cushion {
+  color: #ffffff;
+  font-weight: bold;
+}
+
 .fc-button-primary {
   background-color: var(--secondary-color);
   border-color: var(--secondary-color);
