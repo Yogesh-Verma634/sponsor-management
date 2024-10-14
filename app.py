@@ -7,6 +7,11 @@ from flask_migrate import Migrate
 from flask_mail import Mail
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Base(DeclarativeBase):
     pass
@@ -33,11 +38,14 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 
-# Print configuration for debugging (remove in production)
-print("Mail configuration:")
-print(f"MAIL_USERNAME: {app.config['MAIL_USERNAME']}")
-print(f"MAIL_PASSWORD: {'*' * len(app.config['MAIL_PASSWORD']) if app.config['MAIL_PASSWORD'] else 'Not set'}")
-print(f"MAIL_DEFAULT_SENDER: {app.config['MAIL_DEFAULT_SENDER']}")
+# Log email configuration (without sensitive information)
+logger.info("Mail configuration:")
+logger.info(f"MAIL_SERVER: {app.config['MAIL_SERVER']}")
+logger.info(f"MAIL_PORT: {app.config['MAIL_PORT']}")
+logger.info(f"MAIL_USE_TLS: {app.config['MAIL_USE_TLS']}")
+logger.info(f"MAIL_USERNAME: {app.config['MAIL_USERNAME']}")
+logger.info(f"MAIL_DEFAULT_SENDER: {app.config['MAIL_DEFAULT_SENDER']}")
+logger.info(f"MAIL_PASSWORD: {'Set' if app.config['MAIL_PASSWORD'] else 'Not set'}")
 
 db.init_app(app)
 login_manager.init_app(app)

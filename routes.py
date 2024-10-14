@@ -10,6 +10,8 @@ from email_utils import send_sponsor_notification
 import smtplib
 import logging
 
+logger = logging.getLogger(__name__)
+
 @app.route('/')
 @login_required
 def index():
@@ -111,13 +113,20 @@ def create_test_sponsor():
         try:
             send_sponsor_notification(test_sponsor)
             flash('Test sponsor created and email notification sent successfully.', 'success')
-        except smtplib.SMTPAuthenticationError:
-            flash('Test sponsor created, but email notification failed due to authentication error. Please check your email settings.', 'warning')
+            logger.info('Test sponsor created and email notification sent successfully.')
+        except smtplib.SMTPAuthenticationError as e:
+            error_msg = f'Test sponsor created, but email notification failed due to authentication error: {str(e)}'
+            flash(error_msg, 'warning')
+            logger.error(error_msg)
         except Exception as e:
-            flash(f'Test sponsor created, but email notification failed: {str(e)}', 'warning')
+            error_msg = f'Test sponsor created, but email notification failed: {str(e)}'
+            flash(error_msg, 'warning')
+            logger.error(error_msg)
         
         return redirect(url_for('index'))
     except Exception as e:
         db.session.rollback()
-        flash(f'Error creating test sponsor: {str(e)}', 'danger')
+        error_msg = f'Error creating test sponsor: {str(e)}'
+        flash(error_msg, 'danger')
+        logger.error(error_msg)
         return redirect(url_for('index'))
