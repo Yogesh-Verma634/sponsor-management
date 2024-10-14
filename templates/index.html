@@ -9,7 +9,6 @@
         {% if current_user.is_admin() %}
         <h2>Add New Sponsor</h2>
         {% include "sponsor_form.html" %}
-        {% endif %}
         
         <h2 class="mt-4">Search Sponsors</h2>
         <form id="searchForm" class="mb-3">
@@ -19,6 +18,7 @@
             </div>
         </form>
         <div id="searchResults"></div>
+        {% endif %}
     </div>
 </div>
 
@@ -35,4 +35,10 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.body.dataset.isSuperuser = '{{ current_user.is_admin() }}';
+</script>
 {% endblock %}

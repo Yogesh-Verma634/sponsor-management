@@ -49,23 +49,34 @@ document.addEventListener('DOMContentLoaded', function() {
         calendar.render();
     }
 
-    // Search functionality
+    // Search functionality (only for superusers)
     var searchForm = document.getElementById('searchForm');
     var searchInput = document.getElementById('searchInput');
     var searchResults = document.getElementById('searchResults');
 
-    if (searchForm) {
+    if (searchForm && isSuperuser()) {
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             var query = searchInput.value.trim();
             if (query) {
                 fetch(`/search_sponsors?query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 403) {
+                                throw new Error('Forbidden');
+                            }
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         displaySearchResults(data);
                     })
                     .catch(error => {
                         console.error('Error searching sponsors:', error);
+                        if (error.message === 'Forbidden') {
+                            searchResults.innerHTML = '<p>You do not have permission to search sponsors.</p>';
+                        }
                     });
             }
         });
@@ -81,25 +92,20 @@ document.addEventListener('DOMContentLoaded', function() {
             sponsors.forEach(sponsor => {
                 var li = document.createElement('li');
                 li.className = 'list-group-item';
-                if (sponsor.hasOwnProperty('phone')) {
-                    // Superuser view
-                    li.innerHTML = `
-                        <h5>${sponsor.name}</h5>
-                        <p>Date: ${sponsor.date}</p>
-                        <p>Phone: ${sponsor.phone}</p>
-                        <p>Email: ${sponsor.email}</p>
-                    `;
-                } else {
-                    // Non-superuser view
-                    li.innerHTML = `
-                        <h5>${sponsor.name}</h5>
-                        <p>Date: ${sponsor.date}</p>
-                    `;
-                }
+                li.innerHTML = `
+                    <h5>${sponsor.name}</h5>
+                    <p>Date: ${sponsor.date}</p>
+                    <p>Phone: ${sponsor.phone}</p>
+                    <p>Email: ${sponsor.email}</p>
+                `;
                 ul.appendChild(li);
             });
             searchResults.appendChild(ul);
         }
+    }
+
+    function isSuperuser() {
+        return document.body.dataset.isSuperuser === 'true';
     }
 
     // Add test sponsor button only if the container exists and user is a superuser
