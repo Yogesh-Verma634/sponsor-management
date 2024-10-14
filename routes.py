@@ -9,6 +9,7 @@ from app import check_upcoming_sponsors
 from email_utils import send_sponsor_notification
 import smtplib
 import logging
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -132,3 +133,24 @@ def create_test_sponsor():
         flash(error_msg, 'danger')
         logger.error(error_msg)
         return redirect(url_for('index'))
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    total_sponsors = Sponsor.query.count()
+    upcoming_sponsors = Sponsor.query.filter(Sponsor.date >= datetime.now().date()).count()
+    sponsors_by_month = db.session.query(
+        func.extract('month', Sponsor.date).label('month'),
+        func.count(Sponsor.id).label('count')
+    ).group_by('month').order_by('month').all()
+
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    sponsor_counts = [0] * 12
+    for month, count in sponsors_by_month:
+        sponsor_counts[int(month) - 1] = count
+
+    return render_template('dashboard.html', 
+                           total_sponsors=total_sponsors, 
+                           upcoming_sponsors=upcoming_sponsors,
+                           months=months,
+                           sponsor_counts=sponsor_counts)
