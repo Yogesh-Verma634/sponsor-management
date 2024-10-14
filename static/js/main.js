@@ -49,6 +49,50 @@ document.addEventListener('DOMContentLoaded', function() {
         calendar.render();
     }
 
+    // Search functionality
+    var searchForm = document.getElementById('searchForm');
+    var searchInput = document.getElementById('searchInput');
+    var searchResults = document.getElementById('searchResults');
+
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var query = searchInput.value.trim();
+            if (query) {
+                fetch(`/search_sponsors?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySearchResults(data);
+                    })
+                    .catch(error => {
+                        console.error('Error searching sponsors:', error);
+                    });
+            }
+        });
+    }
+
+    function displaySearchResults(sponsors) {
+        searchResults.innerHTML = '';
+        if (sponsors.length === 0) {
+            searchResults.innerHTML = '<p>No sponsors found.</p>';
+        } else {
+            var ul = document.createElement('ul');
+            ul.className = 'list-group';
+            sponsors.forEach(sponsor => {
+                var li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `
+                    <h5>${sponsor.name}</h5>
+                    <p>Date: ${sponsor.date}</p>
+                    <p>Phone: ${sponsor.phone}</p>
+                    <p>Email: ${sponsor.email}</p>
+                `;
+                ul.appendChild(li);
+            });
+            searchResults.appendChild(ul);
+        }
+    }
+
     // Add test sponsor button only if the container exists
     var sponsorContainer = document.querySelector('.col-md-4');
     if (sponsorContainer) {

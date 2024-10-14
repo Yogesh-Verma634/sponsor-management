@@ -45,6 +45,17 @@ def get_sponsors():
 
     return jsonify([sponsor.to_dict() for sponsor in sponsors])
 
+@app.route('/search_sponsors', methods=['GET'])
+@login_required
+def search_sponsors():
+    query = request.args.get('query', '')
+    sponsors = Sponsor.query.filter(
+        Sponsor.name.ilike(f'%{query}%') |
+        Sponsor.email.ilike(f'%{query}%') |
+        Sponsor.phone.ilike(f'%{query}%')
+    ).all()
+    return jsonify([sponsor.to_dict() for sponsor in sponsors])
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
