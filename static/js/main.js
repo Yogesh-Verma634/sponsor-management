@@ -36,14 +36,16 @@ document.addEventListener('DOMContentLoaded', function() {
             eventClick: function(info) {
                 var sponsor = info.event.extendedProps;
                 var modalBody = document.getElementById('sponsorModalBody');
-                modalBody.innerHTML = `
-                    <p><strong>Name:</strong> ${info.event.title}</p>
-                    <p><strong>Phone:</strong> ${sponsor.phone}</p>
-                    <p><strong>Email:</strong> ${sponsor.email}</p>
-                    <p><strong>Date:</strong> ${info.event.startStr}</p>
-                `;
-                var sponsorModal = new bootstrap.Modal(document.getElementById('sponsorModal'));
-                sponsorModal.show();
+                if (modalBody) {
+                    modalBody.innerHTML = `
+                        <p><strong>Name:</strong> ${info.event.title}</p>
+                        <p><strong>Phone:</strong> ${sponsor.phone}</p>
+                        <p><strong>Email:</strong> ${sponsor.email}</p>
+                        <p><strong>Date:</strong> ${info.event.startStr}</p>
+                    `;
+                    var sponsorModal = new bootstrap.Modal(document.getElementById('sponsorModal'));
+                    sponsorModal.show();
+                }
             }
         });
         calendar.render();
@@ -54,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('searchInput');
     var searchResults = document.getElementById('searchResults');
 
-    if (searchForm && isSuperuser()) {
+    if (searchForm && searchInput && searchResults && isSuperuser()) {
         searchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             var query = searchInput.value.trim();
@@ -83,24 +85,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displaySearchResults(sponsors) {
-        searchResults.innerHTML = '';
-        if (sponsors.length === 0) {
-            searchResults.innerHTML = '<p>No sponsors found.</p>';
-        } else {
-            var ul = document.createElement('ul');
-            ul.className = 'list-group';
-            sponsors.forEach(sponsor => {
-                var li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.innerHTML = `
-                    <h5>${sponsor.name}</h5>
-                    <p>Date: ${sponsor.date}</p>
-                    <p>Phone: ${sponsor.phone}</p>
-                    <p>Email: ${sponsor.email}</p>
-                `;
-                ul.appendChild(li);
-            });
-            searchResults.appendChild(ul);
+        if (searchResults) {
+            searchResults.innerHTML = '';
+            if (sponsors.length === 0) {
+                searchResults.innerHTML = '<p>No sponsors found.</p>';
+            } else {
+                var ul = document.createElement('ul');
+                ul.className = 'list-group';
+                sponsors.forEach(sponsor => {
+                    var li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.innerHTML = `
+                        <h5>${sponsor.name}</h5>
+                        <p>Date: ${sponsor.date}</p>
+                        <p>Phone: ${sponsor.phone}</p>
+                        <p>Email: ${sponsor.email}</p>
+                    `;
+                    ul.appendChild(li);
+                });
+                searchResults.appendChild(ul);
+            }
         }
     }
 
@@ -109,15 +113,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add test sponsor button only if the container exists and user is a superuser
-    var sponsorContainer = document.querySelector('.col-md-4');
-    var addSponsorForm = document.querySelector('form[action="/add_sponsor"]');
-    if (sponsorContainer && addSponsorForm) {
-        var testSponsorBtn = document.createElement('button');
-        testSponsorBtn.textContent = 'Create Test Sponsor';
-        testSponsorBtn.className = 'btn btn-secondary mt-3';
-        testSponsorBtn.addEventListener('click', function() {
-            window.location.href = '/create_test_sponsor';
-        });
-        sponsorContainer.appendChild(testSponsorBtn);
+    if (isSuperuser()) {
+        var sponsorContainer = document.querySelector('.col-md-4');
+        var addSponsorForm = document.querySelector('form[action="/add_sponsor"]');
+        if (sponsorContainer && addSponsorForm) {
+            var testSponsorBtn = document.createElement('button');
+            testSponsorBtn.textContent = 'Create Test Sponsor';
+            testSponsorBtn.className = 'btn btn-secondary mt-3';
+            testSponsorBtn.addEventListener('click', function() {
+                window.location.href = '/create_test_sponsor';
+            });
+            sponsorContainer.appendChild(testSponsorBtn);
+        }
     }
 });
