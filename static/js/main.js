@@ -103,6 +103,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 sponsorContainer.appendChild(testSponsorBtn);
             }
         }
+    } else {
+        // Remove search form and results for non-superusers
+        var searchForm = document.getElementById('searchForm');
+        var searchResults = document.getElementById('searchResults');
+        if (searchForm) {
+            searchForm.remove();
+        }
+        if (searchResults) {
+            searchResults.remove();
+        }
     }
 
     function displaySearchResults(sponsors) {
