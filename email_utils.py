@@ -1,6 +1,6 @@
+from flask import render_template, url_for
 from flask_mail import Message
 from app import mail, app
-from flask import render_template, url_for
 import smtplib
 import logging
 
@@ -43,10 +43,23 @@ def send_superuser_invitation(email, token):
     msg.html = render_template('email/superuser_invitation.html', invitation_link=invitation_link)
     
     try:
+        logger.info(f"Attempting to send superuser invitation to: {email}")
+        logger.info(f"Invitation link: {invitation_link}")
+        logger.info(f"SMTP Server: {app.config['MAIL_SERVER']}")
+        logger.info(f"SMTP Port: {app.config['MAIL_PORT']}")
+        logger.info(f"TLS Enabled: {app.config['MAIL_USE_TLS']}")
+        logger.info(f"Sender: {app.config['MAIL_DEFAULT_SENDER']}")
+        
         mail.send(msg)
         logger.info(f"Superuser invitation sent successfully to: {email}")
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error(f"SMTP Authentication Error: {str(e)}")
+        logger.error(f"Please check your MAIL_USERNAME and MAIL_PASSWORD environment variables.")
+        logger.error("If using Gmail, ensure 'Less secure app access' is enabled or use an app-specific password.")
+        raise
     except Exception as e:
         logger.error(f"Error sending superuser invitation: {str(e)}")
+        logger.error(f"Email configuration: MAIL_SERVER={app.config['MAIL_SERVER']}, MAIL_PORT={app.config['MAIL_PORT']}, MAIL_USE_TLS={app.config['MAIL_USE_TLS']}")
         raise
 
 def send_otp(email, otp):
