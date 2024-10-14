@@ -3,22 +3,28 @@
 {% block content %}
 <div class="row">
     <div class="col-md-8">
-        <div id="calendar"></div>
+        <div id="calendar" class="mb-4"></div>
     </div>
     <div class="col-md-4">
         {% if current_user.is_admin() %}
-        <h2>Add New Sponsor</h2>
-        {% include "sponsor_form.html" %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Add New Sponsor</h2>
+                {% include "sponsor_form.html" %}
+            </div>
+        </div>
         
-        <div id="searchSection">
-            <h2 class="mt-4">Search Sponsors</h2>
-            <form id="searchForm" class="mb-3">
-                <div class="input-group">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search sponsors...">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                </div>
-            </form>
-            <div id="searchResults"></div>
+        <div id="searchSection" class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Search Sponsors</h2>
+                <form id="searchForm" class="mb-3">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search sponsors...">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+                <div id="searchResults"></div>
+            </div>
         </div>
         {% endif %}
     </div>
@@ -41,6 +47,6 @@
 
 {% block scripts %}
 <script>
-    document.body.dataset.isSuperuser = '{{ current_user.is_admin() }}';
+    document.body.dataset.isSuperuser = '{{ current_user.is_admin() }}' === 'True';
 </script>
 {% endblock %}
