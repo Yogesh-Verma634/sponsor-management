@@ -81,12 +81,21 @@ document.addEventListener('DOMContentLoaded', function() {
             sponsors.forEach(sponsor => {
                 var li = document.createElement('li');
                 li.className = 'list-group-item';
-                li.innerHTML = `
-                    <h5>${sponsor.name}</h5>
-                    <p>Date: ${sponsor.date}</p>
-                    <p>Phone: ${sponsor.phone}</p>
-                    <p>Email: ${sponsor.email}</p>
-                `;
+                if (sponsor.hasOwnProperty('phone')) {
+                    // Superuser view
+                    li.innerHTML = `
+                        <h5>${sponsor.name}</h5>
+                        <p>Date: ${sponsor.date}</p>
+                        <p>Phone: ${sponsor.phone}</p>
+                        <p>Email: ${sponsor.email}</p>
+                    `;
+                } else {
+                    // Non-superuser view
+                    li.innerHTML = `
+                        <h5>${sponsor.name}</h5>
+                        <p>Date: ${sponsor.date}</p>
+                    `;
+                }
                 ul.appendChild(li);
             });
             searchResults.appendChild(ul);

@@ -71,7 +71,15 @@ def search_sponsors():
         Sponsor.email.ilike(f'%{query}%') |
         Sponsor.phone.ilike(f'%{query}%')
     ).all()
-    return jsonify([sponsor.to_dict() for sponsor in sponsors])
+    
+    if current_user.is_admin():
+        return jsonify([sponsor.to_dict() for sponsor in sponsors])
+    else:
+        limited_sponsors = [{
+            'name': sponsor.name,
+            'date': sponsor.date.isoformat()
+        } for sponsor in sponsors]
+        return jsonify(limited_sponsors)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
