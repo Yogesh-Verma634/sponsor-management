@@ -104,14 +104,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     } else {
-        // Remove search form and results for non-superusers
-        var searchForm = document.getElementById('searchForm');
-        var searchResults = document.getElementById('searchResults');
-        if (searchForm) {
-            searchForm.remove();
-        }
-        if (searchResults) {
-            searchResults.remove();
+        // Remove search section for non-superusers
+        var searchSection = document.getElementById('searchSection');
+        if (searchSection) {
+            searchSection.remove();
         }
     }
 
