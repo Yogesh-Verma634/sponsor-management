@@ -88,17 +88,20 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Add test sponsor button
+        // Add test sponsor button only if the container exists
         var sponsorContainer = document.querySelector('.col-md-4');
         var addSponsorForm = document.querySelector('form[action="/add_sponsor"]');
         if (sponsorContainer && addSponsorForm) {
-            var testSponsorBtn = document.createElement('button');
-            testSponsorBtn.textContent = 'Create Test Sponsor';
-            testSponsorBtn.className = 'btn btn-secondary mt-3';
-            testSponsorBtn.addEventListener('click', function() {
-                window.location.href = '/create_test_sponsor';
-            });
-            sponsorContainer.appendChild(testSponsorBtn);
+            var existingTestSponsorBtn = sponsorContainer.querySelector('.btn-secondary');
+            if (!existingTestSponsorBtn) {
+                var testSponsorBtn = document.createElement('button');
+                testSponsorBtn.textContent = 'Create Test Sponsor';
+                testSponsorBtn.className = 'btn btn-secondary mt-3';
+                testSponsorBtn.addEventListener('click', function() {
+                    window.location.href = '/create_test_sponsor';
+                });
+                sponsorContainer.appendChild(testSponsorBtn);
+            }
         }
     }
 
