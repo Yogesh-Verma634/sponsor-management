@@ -35,6 +35,7 @@ def index():
 
 @app.route('/add_sponsor', methods=['POST'])
 @login_required
+@superuser_required
 def add_sponsor():
     name = request.form['name']
     phone = request.form['phone']
@@ -45,6 +46,7 @@ def add_sponsor():
     db.session.add(new_sponsor)
     db.session.commit()
 
+    flash('Sponsor added successfully.', 'success')
     return redirect(url_for('index'))
 
 @app.route('/get_sponsors', methods=['GET'])
@@ -139,6 +141,7 @@ def forbidden(error):
 
 @app.route('/create_test_sponsor')
 @login_required
+@superuser_required
 def create_test_sponsor():
     try:
         test_sponsor = Sponsor(

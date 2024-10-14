@@ -93,9 +93,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Add test sponsor button only if the container exists
+    // Add test sponsor button only if the container exists and user is a superuser
     var sponsorContainer = document.querySelector('.col-md-4');
-    if (sponsorContainer) {
+    var addSponsorForm = document.querySelector('form[action="/add_sponsor"]');
+    if (sponsorContainer && addSponsorForm) {
         var testSponsorBtn = document.createElement('button');
         testSponsorBtn.textContent = 'Create Test Sponsor';
         testSponsorBtn.className = 'btn btn-secondary mt-3';
