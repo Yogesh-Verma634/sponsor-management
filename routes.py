@@ -6,6 +6,9 @@ from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError, DataError
 from app import check_upcoming_sponsors
+from email_utils import send_sponsor_notification
+import smtplib
+import logging
 
 @app.route('/')
 @login_required
@@ -95,17 +98,26 @@ def unauthorized(error):
 @app.route('/create_test_sponsor')
 @login_required
 def create_test_sponsor():
-    test_sponsor = Sponsor(
-        name="Test Sponsor",
-        phone="1234567890",
-        email="test@example.com",
-        date=datetime.now().date() + timedelta(days=1)
-    )
-    db.session.add(test_sponsor)
-    db.session.commit()
-    
-    # Manually trigger the check_upcoming_sponsors function
-    check_upcoming_sponsors()
-    
-    flash('Test sponsor created and email notification sent.', 'success')
-    return redirect(url_for('index'))
+    try:
+        test_sponsor = Sponsor(
+            name="Test Sponsor",
+            phone="1234567890",
+            email="test@example.com",
+            date=datetime.now().date() + timedelta(days=1)
+        )
+        db.session.add(test_sponsor)
+        db.session.commit()
+        
+        try:
+            send_sponsor_notification(test_sponsor)
+            flash('Test sponsor created and email notification sent successfully.', 'success')
+        except smtplib.SMTPAuthenticationError:
+            flash('Test sponsor created, but email notification failed due to authentication error. Please check your email settings.', 'warning')
+        except Exception as e:
+            flash(f'Test sponsor created, but email notification failed: {str(e)}', 'warning')
+        
+        return redirect(url_for('index'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error creating test sponsor: {str(e)}', 'danger')
+        return redirect(url_for('index'))
