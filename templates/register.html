@@ -17,7 +17,7 @@
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            {% if current_user.is_authenticated and current_user.is_superuser %}
+            {% if current_user.is_authenticated and current_user.is_admin() %}
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="is_superuser" name="is_superuser">
                 <label class="form-check-label" for="is_superuser">Register as Superuser</label>

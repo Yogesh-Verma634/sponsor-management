@@ -43,3 +43,6 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+    def is_admin(self):
+        return self.is_superuser

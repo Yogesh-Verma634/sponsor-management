@@ -20,7 +20,7 @@ def superuser_required(f):
         if not current_user.is_authenticated:
             logger.warning(f"Unauthenticated user attempted to access {f.__name__}")
             return redirect(url_for('login', next=request.url))
-        if not current_user.is_superuser:
+        if not current_user.is_admin():
             logger.warning(f"Non-superuser {current_user.username} attempted to access {f.__name__}")
             flash('You do not have permission to access this page.', 'danger')
             return redirect(url_for('index'))
@@ -79,7 +79,10 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        is_superuser = 'is_superuser' in request.form
+        is_superuser = False
+        
+        if current_user.is_authenticated and current_user.is_admin():
+            is_superuser = 'is_superuser' in request.form
         
         try:
             new_user = User(username=username, email=email, password_hash=generate_password_hash(password), is_superuser=is_superuser)
@@ -111,6 +114,10 @@ def login():
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             logger.info(f"User {user.username} logged in. Superuser: {user.is_superuser}")
+            if user.is_admin():
+                flash('Logged in as superuser.', 'success')
+            else:
+                flash('Logged in successfully.', 'success')
             next_page = request.args.get('next')
             return redirect(next_page or url_for('index'))
         flash('Invalid username or password', 'danger')
