@@ -139,6 +139,8 @@ def create_test_sponsor():
 def dashboard():
     total_sponsors = Sponsor.query.count()
     upcoming_sponsors = Sponsor.query.filter(Sponsor.date >= datetime.now().date()).count()
+    
+    # Sponsors by month
     sponsors_by_month = db.session.query(
         func.extract('month', Sponsor.date).label('month'),
         func.count(Sponsor.id).label('count')
@@ -149,8 +151,12 @@ def dashboard():
     for month, count in sponsors_by_month:
         sponsor_counts[int(month) - 1] = count
 
+    # Top 5 upcoming sponsors
+    top_upcoming_sponsors = Sponsor.query.filter(Sponsor.date >= datetime.now().date()).order_by(Sponsor.date).limit(5).all()
+
     return render_template('dashboard.html', 
                            total_sponsors=total_sponsors, 
                            upcoming_sponsors=upcoming_sponsors,
                            months=months,
-                           sponsor_counts=sponsor_counts)
+                           sponsor_counts=sponsor_counts,
+                           top_upcoming_sponsors=top_upcoming_sponsors)

@@ -22,11 +22,36 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12">
+        <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Sponsors by Month</h5>
-                    <canvas id="sponsorsChart"></canvas>
+                    <canvas id="sponsorsBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Sponsors Distribution</h5>
+                    <canvas id="sponsorsPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Top 5 Upcoming Sponsors</h5>
+                    <ul class="list-group">
+                    {% for sponsor in top_upcoming_sponsors %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ sponsor.name }}
+                            <span class="badge bg-primary rounded-pill">{{ sponsor.date.strftime('%Y-%m-%d') }}</span>
+                        </li>
+                    {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
@@ -38,8 +63,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var ctx = document.getElementById('sponsorsChart').getContext('2d');
-        var chart = new Chart(ctx, {
+        var ctx = document.getElementById('sponsorsBarChart').getContext('2d');
+        var barChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: {{ months | tojson }},
@@ -58,6 +83,45 @@
                         ticks: {
                             stepSize: 1
                         }
+                    }
+                }
+            }
+        });
+
+        var pieCtx = document.getElementById('sponsorsPieChart').getContext('2d');
+        var pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ months | tojson }},
+                datasets: [{
+                    data: {{ sponsor_counts | tojson }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)'
+                    ],
+                    borderColor: 'rgba(255, 255, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Sponsor Distribution by Month'
                     }
                 }
             }
