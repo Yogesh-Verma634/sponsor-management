@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function isSuperuser() {
-        return document.body.dataset.superuser === 'true';
+        return document.body.getAttribute('data-superuser') === 'True';
     }
 
     console.log('isSuperuser:', isSuperuser());
