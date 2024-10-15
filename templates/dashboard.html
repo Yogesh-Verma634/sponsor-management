@@ -4,6 +4,35 @@
 <div class="container mt-4">
     <h1>Dashboard</h1>
     <p>Welcome to your dashboard, {{ current_user.username }}!</p>
-    <!-- Add more dashboard content here -->
+    
+    {% if current_user.is_admin() %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">User Statistics</h5>
+                    <p class="card-text">Total Users: {{ total_users }}</p>
+                    <p class="card-text">Total Sponsors: {{ total_sponsors }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Sponsors</h5>
+                    <ul class="list-group">
+                        {% for sponsor in recent_sponsors %}
+                        <li class="list-group-item">
+                            {{ sponsor.name }} - {{ sponsor.date.strftime('%Y-%m-%d') }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>You do not have access to advanced dashboard features.</p>
+    {% endif %}
 </div>
 {% endblock %}

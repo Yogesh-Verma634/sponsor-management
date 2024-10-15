@@ -36,7 +36,13 @@ def index():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    if current_user.is_admin():
+        total_users = User.query.count()
+        total_sponsors = Sponsor.query.count()
+        recent_sponsors = Sponsor.query.order_by(Sponsor.created_at.desc()).limit(5).all()
+        return render_template('dashboard.html', total_users=total_users, total_sponsors=total_sponsors, recent_sponsors=recent_sponsors)
+    else:
+        return render_template('dashboard.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
