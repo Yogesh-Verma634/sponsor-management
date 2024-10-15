@@ -44,9 +44,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block scripts %}
-<script>
-    document.body.dataset.superuser = '{{ current_user.is_admin() }}' === 'True';
-</script>
-{% endblock %}

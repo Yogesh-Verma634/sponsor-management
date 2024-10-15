@@ -42,7 +42,8 @@ def dashboard():
         recent_sponsors = Sponsor.query.order_by(Sponsor.created_at.desc()).limit(5).all()
         return render_template('dashboard.html', total_users=total_users, total_sponsors=total_sponsors, recent_sponsors=recent_sponsors)
     else:
-        return render_template('dashboard.html')
+        flash('You do not have permission to access the dashboard.', 'danger')
+        return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
