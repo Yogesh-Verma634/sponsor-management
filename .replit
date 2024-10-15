@@ -27,6 +27,26 @@ args = "Check Database"
 task = "workflow.run"
 args = "Reset Database"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Create Migration"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Create Initial Migration"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Reset Database and Migrations"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Reset Migration"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Clean Migration"
+
 [[workflows.workflow]]
 name = "Start Flask App"
 author = "agent"
@@ -71,6 +91,61 @@ agentRequireRestartOnSave = false
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python3 reset_database.py"
+
+[[workflows.workflow]]
+name = "Create Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Initial migration'"
+
+[[workflows.workflow]]
+name = "Create Initial Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "flask db migrate -m 'Initial migration'"
+
+[[workflows.workflow]]
+name = "Reset Database and Migrations"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -rf migrations && flask db init && python reset_database.py && flask db migrate -m 'Initial migration' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Reset Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -rf migrations && flask db init && python reset_database.py && flask db migrate -m 'Initial migration' && flask db upgrade"
+
+[[workflows.workflow]]
+name = "Clean Migration"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -rf migrations && flask db init && python reset_database.py && flask db migrate -m 'Initial migration' && flask db upgrade"
 
 [deployment]
 run = ["sh", "-c", "python main.py"]
