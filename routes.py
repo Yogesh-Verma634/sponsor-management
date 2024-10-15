@@ -123,4 +123,11 @@ def search_sponsors():
     
     return jsonify([sponsor.to_dict() for sponsor in sponsors])
 
+@app.route('/admin')
+@login_required
+@superuser_required
+def admin():
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
 # ... [rest of the code remains unchanged]

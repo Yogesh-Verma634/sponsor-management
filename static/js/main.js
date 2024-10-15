@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function isSuperuser() {
         var superuserAttr = document.body.getAttribute('data-superuser');
         console.log('data-superuser attribute:', superuserAttr);
-        return superuserAttr === 'True';
+        return superuserAttr === 'True' || superuserAttr === 'true';
     }
 
     console.log('isSuperuser:', isSuperuser());
