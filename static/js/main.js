@@ -52,7 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function isSuperuser() {
-        return document.body.getAttribute('data-superuser') === 'True';
+        var superuserAttr = document.body.getAttribute('data-superuser');
+        console.log('data-superuser attribute:', superuserAttr);
+        return superuserAttr === 'True';
     }
 
     console.log('isSuperuser:', isSuperuser());
@@ -60,7 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var searchSection = document.getElementById('searchSection');
     if (searchSection) {
         if (isSuperuser()) {
-            console.log('User is a superuser');
+            console.log('User is a superuser, showing search section');
+            searchSection.style.display = 'block';
+
             var searchForm = document.getElementById('searchForm');
             var searchInput = document.getElementById('searchInput');
             var searchResults = document.getElementById('searchResults');
@@ -91,6 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                     }
                 });
+            } else {
+                console.error('Search form elements not found');
             }
 
             function displaySearchResults(sponsors) {
@@ -117,10 +123,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         } else {
-            console.log('User is not a superuser');
+            console.log('User is not a superuser, hiding search section');
             searchSection.style.display = 'none';
         }
     } else {
-        console.log('Search section not found in the DOM');
+        console.error('Search section not found in the DOM');
     }
 });
