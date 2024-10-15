@@ -47,6 +47,6 @@
 
 {% block scripts %}
 <script>
-    document.body.dataset.isSuperuser = '{{ current_user.is_admin() }}' === 'True';
+    document.body.dataset.superuser = '{{ current_user.is_admin() }}' === 'True';
 </script>
 {% endblock %}
