@@ -108,7 +108,14 @@ def get_sponsors():
         Sponsor.date <= end_date
     ).all()
 
-    return jsonify([sponsor.to_dict() for sponsor in sponsors])
+    if current_user.is_admin():
+        return jsonify([sponsor.to_dict() for sponsor in sponsors])
+    else:
+        return jsonify([{
+            'id': sponsor.id,
+            'name': sponsor.name,
+            'date': sponsor.date.isoformat()
+        } for sponsor in sponsors])
 
 @app.route('/search_sponsors', methods=['GET'])
 @login_required

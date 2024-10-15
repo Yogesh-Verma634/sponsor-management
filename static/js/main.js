@@ -20,11 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         var events = data.map(sponsor => ({
                             title: sponsor.name,
                             start: sponsor.date,
-                            extendedProps: {
-                                id: sponsor.id,
-                                phone: sponsor.phone,
-                                email: sponsor.email
-                            }
+                            extendedProps: sponsor
                         }));
                         successCallback(events);
                     })
@@ -37,12 +33,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 var sponsor = info.event.extendedProps;
                 var modalBody = document.getElementById('sponsorModalBody');
                 if (modalBody) {
-                    modalBody.innerHTML = `
+                    var content = `
                         <p><strong>Name:</strong> ${info.event.title}</p>
-                        <p><strong>Phone:</strong> ${sponsor.phone}</p>
-                        <p><strong>Email:</strong> ${sponsor.email}</p>
                         <p><strong>Date:</strong> ${info.event.startStr}</p>
                     `;
+                    if (isSuperuser()) {
+                        content += `
+                            <p><strong>Phone:</strong> ${sponsor.phone || 'N/A'}</p>
+                            <p><strong>Email:</strong> ${sponsor.email || 'N/A'}</p>
+                        `;
+                    }
+                    modalBody.innerHTML = content;
                     var sponsorModal = new bootstrap.Modal(document.getElementById('sponsorModal'));
                     sponsorModal.show();
                 }
