@@ -52,14 +52,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function isSuperuser() {
-        return document.body.dataset.superuser === 'True';
+        return document.body.dataset.isSuperuser === 'true';
     }
 
     console.log('isSuperuser:', isSuperuser()); // Debug log
 
-    var searchSection = document.getElementById('searchSection');
-    if (searchSection) {
-        if (isSuperuser()) {
+    if (isSuperuser()) {
+        var searchSection = document.getElementById('searchSection');
+        if (searchSection) {
             var searchForm = document.getElementById('searchForm');
             var searchInput = document.getElementById('searchInput');
             var searchResults = document.getElementById('searchResults');
@@ -116,10 +116,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         } else {
-            searchSection.style.display = 'none';
-            console.log('Search section hidden for non-superuser');
+            console.log('Search section not found in the DOM'); // Debug log
         }
     } else {
-        console.log('Search section not found in the DOM');
+        console.log('User is not a superuser'); // Debug log
+        var searchSection = document.getElementById('searchSection');
+        if (searchSection) {
+            searchSection.remove();
+            console.log('Search section removed for non-superuser'); // Debug log
+        } else {
+            console.log('Search section not found for removal'); // Debug log
+        }
     }
 });
