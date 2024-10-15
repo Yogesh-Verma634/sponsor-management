@@ -127,6 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
             searchSection.style.display = 'none';
         }
     } else {
-        console.error('Search section not found in the DOM');
+        console.log('Search section not found in the DOM');
     }
 });

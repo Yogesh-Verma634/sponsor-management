@@ -37,14 +37,14 @@ class User(UserMixin, db.Model):
     is_superuser = db.Column(db.Boolean, default=False)
     otp = db.Column(db.String(6))
     is_verified = db.Column(db.Boolean, default=False)
-    is_active = db.Column(db.Boolean, default=True)
+    # is_active = db.Column(db.Boolean, default=True)
 
     def __init__(self, username, email, password_hash, is_superuser=False):
         self.username = username
         self.email = email
         self.password_hash = password_hash
         self.is_superuser = is_superuser
-        self.is_active = True
+        # self.is_active = True
 
     def __repr__(self):
         return f'<User {self.username}>'
