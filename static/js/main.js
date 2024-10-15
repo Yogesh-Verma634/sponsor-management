@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function isSuperuser() {
         var superuserAttr = document.body.getAttribute('data-superuser');
-        console.log('data-superuser attribute:', superuserAttr);
         return superuserAttr === 'True' || superuserAttr === 'true';
     }
 
@@ -92,6 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.error('Error searching sponsors:', error);
                                 if (error.message === 'Forbidden') {
                                     searchResults.innerHTML = '<p>You do not have permission to search sponsors.</p>';
+                                } else {
+                                    searchResults.innerHTML = '<p>An error occurred while searching sponsors.</p>';
                                 }
                             });
                     }

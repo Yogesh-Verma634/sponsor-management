@@ -35,15 +35,12 @@ def index():
 
 @app.route('/dashboard')
 @login_required
+@superuser_required
 def dashboard():
-    if current_user.is_admin():
-        total_users = User.query.count()
-        total_sponsors = Sponsor.query.count()
-        recent_sponsors = Sponsor.query.order_by(Sponsor.created_at.desc()).limit(5).all()
-        return render_template('dashboard.html', total_users=total_users, total_sponsors=total_sponsors, recent_sponsors=recent_sponsors)
-    else:
-        flash('You do not have permission to access the dashboard.', 'danger')
-        return redirect(url_for('index'))
+    total_users = User.query.count()
+    total_sponsors = Sponsor.query.count()
+    recent_sponsors = Sponsor.query.order_by(Sponsor.created_at.desc()).limit(5).all()
+    return render_template('dashboard.html', total_users=total_users, total_sponsors=total_sponsors, recent_sponsors=recent_sponsors)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
